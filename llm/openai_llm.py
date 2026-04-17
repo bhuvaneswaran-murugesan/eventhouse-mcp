@@ -1,11 +1,21 @@
-from openai import OpenAI
-from config.settings import OPENAI_API_KEY, OPENAI_MODEL
+from openai import AzureOpenAI
+from config.settings import (
+    AZURE_OPENAI_API_KEY,
+    AZURE_OPENAI_ENDPOINT,
+    AZURE_OPENAI_DEPLOYMENT,
+    AZURE_OPENAI_API_VERSION
+)
 from llm.base import BaseLLM
 
-class OpenAIClient(BaseLLM):
+
+class AzureOpenAIClient(BaseLLM):
     def __init__(self):
-        self.client = OpenAI(api_key=OPENAI_API_KEY)
-        self.model = OPENAI_MODEL
+        self.client = AzureOpenAI(
+            api_key=AZURE_OPENAI_API_KEY,
+            azure_endpoint=AZURE_OPENAI_ENDPOINT,
+            api_version=AZURE_OPENAI_API_VERSION
+        )
+        self.model = AZURE_OPENAI_DEPLOYMENT
 
     def generate(self, prompt: str) -> str:
         response = self.client.chat.completions.create(
@@ -14,4 +24,5 @@ class OpenAIClient(BaseLLM):
                 {"role": "user", "content": prompt}
             ]
         )
+
         return response.choices[0].message.content.strip()
