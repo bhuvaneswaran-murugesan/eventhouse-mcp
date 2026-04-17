@@ -1,37 +1,36 @@
 from mcp.tools import get_schema, execute_query
-from llm.gemini_llm import GeminiClient
 
 class Orchestrator:
-    def __init__(self, mcp_client):
+    def __init__(self, mcp_client, llm):
         self.mcp = mcp_client
-        self.llm = GeminiClient()
-        self.history = []
+        self.llm = llm
+
+    def set_llm(self, llm):
+        self.llm = llm
 
     def ask(self, question):
         schema = get_schema(self.mcp, question)
 
-        prompt = f"""
-Schema:
-{schema}
+        kql_prompt = f"""
+        Schema:
+        {schema}
 
-Question:
-{question}
+        Question:
+        {question}
 
-Return only KQL query.
-"""
+        Return only KQL query.
+        """
 
-        kql = self.llm.generate(prompt)
+        kql = self.llm.generate(kql_prompt)
 
         result = execute_query(self.mcp, kql)
 
         final_prompt = f"""
-Question: {question}
-Query: {kql}
-Result: {result}
+        Question: {question}
+        Query: {kql}
+        Result: {result}
 
-Explain in simple terms.
-"""
+        Explain clearly.
+        """
 
-        answer = self.llm.generate(final_prompt)
-
-        return answer
+        return self.llm.generate(final_prompt)
